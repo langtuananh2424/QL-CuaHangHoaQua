@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\InventoryManagerInterface;
+use App\Services\DatabaseInventoryManager;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(InventoryManagerInterface::class, DatabaseInventoryManager::class);
     }
 
     /**
