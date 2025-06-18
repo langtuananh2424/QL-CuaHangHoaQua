@@ -6,9 +6,12 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    protected $listen = [
+    // ... các event khác
+    'App\Events\OrderPlaced' => [
+        'App\Listeners\UpdateStockAfterOrder',
+    ],
+];
     public function register(): void
     {
         //
