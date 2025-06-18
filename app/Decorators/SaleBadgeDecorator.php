@@ -12,7 +12,6 @@ class SaleBadgeDecorator implements FruitDisplayInterface
     {
         $this->fruit = $fruit;
     }
-
     public function display(): string
     {
         return '

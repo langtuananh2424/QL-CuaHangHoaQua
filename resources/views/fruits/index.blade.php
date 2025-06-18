@@ -1,63 +1,52 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="text-center mb-6">
-        <h1 class="text-3xl font-bold text-green-700">🍓 Danh sách hoa quả</h1>
+    <div class="text-center mb-10">
+        <h1 class="text-3xl font-bold text-green-700">🍓 Danh sách Hoa Quả</h1>
     </div>
 
-    <form method="GET" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4 px-4 max-w-4xl mx-auto">
-        {{-- Lọc theo loại --}}
-        <div>
-            <label class="block mb-1 font-medium">Loại:</label>
-            <select name="type" class="w-full border border-gray-300 rounded px-3 py-2">
-                <option value="">-- Tất cả --</option>
-                <option value="apple" {{ request('type') == 'apple' ? 'selected' : '' }}>Táo</option>
-                <option value="mango" {{ request('type') == 'mango' ? 'selected' : '' }}>Xoài</option>
-                <option value="banana" {{ request('type') == 'banana' ? 'selected' : '' }}>Chuối</option>
-            </select>
+    {{-- Nhóm Giảm Giá --}}
+    <section class="mb-12 px-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-red-600">🔥 Giảm giá</h2>
+            <a href="{{ route('fruits.category', 'sale') }}" class="text-sm text-blue-500 hover:underline">Xem tất cả</a>
         </div>
-
-        {{-- Lọc theo giá --}}
-        <div>
-            <label class="block mb-1 font-medium">Giá từ:</label>
-            <input type="number" name="min_price" value="{{ request('min_price') }}"
-                   class="w-full border border-gray-300 rounded px-3 py-2">
+        <div class="flex flex-wrap gap-6 justify-center">
+            @forelse ($saleFruits as $fruit)
+                @include('fruits.partials.card', ['fruit' => $fruit])
+            @empty
+                <p>Không có sản phẩm nào.</p>
+            @endforelse
         </div>
+    </section>
 
-        <div>
-            <label class="block mb-1 font-medium">đến:</label>
-            <input type="number" name="max_price" value="{{ request('max_price') }}"
-                   class="w-full border border-gray-300 rounded px-3 py-2">
+    {{-- Nhóm Cao Cấp --}}
+    <section class="mb-12 px-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-yellow-600">🌟 Cao cấp</h2>
+            <a href="{{ route('fruits.category', 'premium') }}" class="text-sm text-blue-500 hover:underline">Xem tất cả</a>
         </div>
-
-        {{-- Các tùy chọn lọc đặc biệt --}}
-        <div class="col-span-1 md:col-span-3 flex items-center space-x-4">
-            <label class="inline-flex items-center space-x-2">
-                <input type="checkbox" name="sale" {{ request()->has('sale') ? 'checked' : '' }}
-                class="rounded border-gray-300">
-                <span>Giảm giá</span>
-            </label>
-            <label class="inline-flex items-center space-x-2">
-                <input type="checkbox" name="premium" {{ request()->has('premium') ? 'checked' : '' }}
-                class="rounded border-gray-300">
-                <span>Cao cấp</span>
-            </label>
-            <label class="inline-flex items-center space-x-2">
-                <input type="checkbox" name="organic" {{ request()->has('organic') ? 'checked' : '' }}
-                class="rounded border-gray-300">
-                <span>Hữu cơ</span>
-            </label>
-
-            <button type="submit"
-                    class="ml-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow">
-                Lọc
-            </button>
+        <div class="flex flex-wrap gap-6 justify-center">
+            @forelse ($premiumFruits as $fruit)
+                @include('fruits.partials.card', ['fruit' => $fruit])
+            @empty
+                <p>Không có sản phẩm nào.</p>
+            @endforelse
         </div>
-    </form>
+    </section>
 
-    <div class="flex flex-wrap gap-6 justify-center">
-        @foreach ($fruits as $fruitHtml)
-            {!! $fruitHtml !!}
-        @endforeach
-    </div>
+    {{-- Nhóm Hữu Cơ --}}
+    <section class="mb-12 px-4">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-green-700">🍀 Hữu cơ</h2>
+            <a href="{{ route('fruits.category', 'organic') }}" class="text-sm text-blue-500 hover:underline">Xem tất cả</a>
+        </div>
+        <div class="flex flex-wrap gap-6 justify-center">
+            @forelse ($organicFruits as $fruit)
+                @include('fruits.partials.card', ['fruit' => $fruit])
+            @empty
+                <p>Không có sản phẩm nào.</p>
+            @endforelse
+        </div>
+    </section>
 @endsection

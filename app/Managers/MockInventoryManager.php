@@ -10,7 +10,6 @@ class MockInventoryManager implements InventoryManagerInterface
 {
     public function getAllFruits(): Collection
     {
-        // Mock dữ liệu từ database (hoặc có thể hardcode nếu cần)
         return Fruit::all();
     }
 }

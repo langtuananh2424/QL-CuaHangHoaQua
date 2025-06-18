@@ -8,7 +8,15 @@ use App\Contracts\FruitDisplayInterface;
 class Fruit extends Model implements FruitDisplayInterface
 {
     protected $fillable = [
-        'name', 'type', 'price', 'stock', 'image_url'
+        'name',
+        'type',
+        'price',
+        'stock',
+        'image_url',
+        'is_on_sale',
+        'is_premium',
+        'is_organic',
+        'original_price', // nếu bạn hiển thị giá gốc khi giảm giá
     ];
 
     public function display(): string
@@ -19,7 +27,6 @@ class Fruit extends Model implements FruitDisplayInterface
             <h3>' . $this->name . '</h3>
             <p>' . number_format($this->price, 0, ',', '.') . ' VND</p>
         </div>
-    ';
+        ';
     }
-
 }

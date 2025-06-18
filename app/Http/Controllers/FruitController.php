@@ -2,65 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Fruit;
 use Illuminate\Http\Request;
-use App\Contracts\InventoryManagerInterface;
-use App\Decorators\SaleBadgeDecorator;
-use App\Decorators\PremiumPackagingDecorator;
-use App\Decorators\OrganicFruitDecorator;
 
 class FruitController extends Controller
 {
-    protected InventoryManagerInterface $inventory;
-
-    public function __construct(InventoryManagerInterface $inventory)
+    public function index()
     {
-        $this->inventory = $inventory;
+        $saleFruits = Fruit::where('is_on_sale', true)->take(4)->get();
+        $premiumFruits = Fruit::where('is_premium', true)->take(4)->get();
+        $organicFruits = Fruit::where('is_organic', true)->take(4)->get();
+
+        return view('fruits.index', compact('saleFruits', 'premiumFruits', 'organicFruits'));
     }
 
-    public function index(Request $request)
+    public function category(string $type)
     {
-        $fruits = $this->inventory->getAllFruits();
+        $query = Fruit::query();
 
-        // Lọc theo type
-        if ($request->filled('type')) {
-            $fruits = $fruits->where('type', $request->input('type'));
+        if ($type === 'sale') {
+            $query->where('is_on_sale', true);
+        } elseif ($type === 'premium') {
+            $query->where('is_premium', true);
+        } elseif ($type === 'organic') {
+            $query->where('is_organic', true);
         }
 
-        // Lọc theo khoảng giá
-        if ($request->filled('min_price')) {
-            $fruits = $fruits->where('price', '>=', (float)$request->input('min_price'));
-        }
+        $fruits = $query->paginate(12);
 
-        if ($request->filled('max_price')) {
-            $fruits = $fruits->where('price', '<=', (float)$request->input('max_price'));
-        }
-
-        $useSale = $request->has('sale');
-        $usePremium = $request->has('premium');
-        $useOrganic = $request->has('organic');
-
-        $displayFruits = $fruits->map(function ($fruit) use ($useSale, $usePremium, $useOrganic) {
-            $decorated = $fruit;
-
-            if ($useSale) {
-                $decorated = new SaleBadgeDecorator($decorated);
-            }
-
-            if ($usePremium) {
-                $decorated = new PremiumPackagingDecorator($decorated);
-            }
-
-            if ($useOrganic) {
-                $decorated = new OrganicFruitDecorator($decorated);
-            }
-
-            return $decorated->display();
-        });
-
-        return view('fruits.index', [
-            'fruits' => $displayFruits,
-            'filters' => $request->only(['type', 'min_price', 'max_price', 'sale', 'premium', 'organic'])
-        ]);
+        return view('fruits.category', compact('fruits', 'type'));
     }
-
 }

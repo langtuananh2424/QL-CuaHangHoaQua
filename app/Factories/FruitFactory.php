@@ -8,7 +8,6 @@ use App\Fruits\Types\{
     Pear, Grape, Strawberry, Papaya, Kiwi, Plum,
     Jackfruit, Durian, Lychee, Longan, GenericFruit
 };
-
 class FruitFactory
 {
     public static function create(string $type): FruitInterface
