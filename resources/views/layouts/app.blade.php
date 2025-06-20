@@ -62,7 +62,7 @@
         <!-- Footer -->
         <footer class="footer text-center">
             <div class="container">
-                <p>&copy; {{ date('Y') }} VANTHEWEB.com - Hoa quả sạch, hạt giống, cây giống chất lượng.</p>
+                <p>&copy; {{ date('Y') }} Hoa quả sạch, hạt giống, cây giống chất lượng.</p>
             </div>
         </footer>
         @stack('scripts')
