@@ -22,11 +22,6 @@
                     <ul class="header-nav-list">
                         <li><a class="active" href="/">Trang chủ</a></li>
                         <li><a href="#">Sản phẩm</a></li>
-                        <li><a href="#">Giới thiệu</a></li>
-                        <li><a href="#">Tư vấn</a></li>
-                        <li><a href="#">Chuyên mục sức khỏe</a></li>
-                        <li><a href="#">Tin tức</a></li>
-                        <li><a href="#">Liên hệ</a></li>
                     </ul>
                 </nav>
                 <form class="header-search" action="{{ route('home') }}" method="get">
