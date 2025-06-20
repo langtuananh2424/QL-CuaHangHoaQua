@@ -81,6 +81,15 @@ class CartController extends Controller
             return redirect()->route('cart.show')->with('error', 'Bạn chưa chọn sản phẩm nào để thanh toán!');
         }
 
+        // Cập nhật tồn kho cho các sản phẩm được thanh toán
+        foreach ($selectedItems as $item) {
+            $fruit = $item->fruit;
+            if ($fruit) {
+                $fruit->stock = max(0, $fruit->stock - $item->quantity);
+                $fruit->save();
+            }
+        }
+
         // Nếu chọn hết thì chuyển trạng thái order sang completed
         if ($selectedItems->count() === $order->orderItems->count()) {
             $order->status = 'completed';

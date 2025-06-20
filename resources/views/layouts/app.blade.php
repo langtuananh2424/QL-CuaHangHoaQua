@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>VANTHEWEB - Hoa quả sạch</title>
+        <title>Quản lí hoa quả sạch</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <link rel="stylesheet" href="{{ asset('css/header.css') }}">
@@ -49,7 +49,19 @@
                     @endauth
                     <a href="{{ route('cart.show') }}"><i class="fa fa-shopping-cart"></i> Giỏ hàng
                         <span class="badge">
-                            {{ session('cart_memento') && is_a(session('cart_memento'), App\DesignPatterns\Memento\CartMemento::class) ? count(session('cart_memento')->getState()) : 0 }}
+                            @auth
+                                <?php
+                                $cartCount = 0;
+                                $order = \App\Models\Order::where('user_id', Auth::id())
+                                    ->where('status', 'pending')->first();
+                                if ($order) {
+                                    $cartCount = $order->orderItems()->sum('quantity');
+                                }
+                                ?>
+                                {{ $cartCount }}
+                            @else
+                                0
+                            @endauth
                         </span>
                     </a>
                 </div>

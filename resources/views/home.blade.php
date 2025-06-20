@@ -73,6 +73,7 @@
                         <div class="card-body">
                             <h6 class="card-title">{{ $product->name }}</h6>
                             <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
+                            <p class="text-muted mb-1" style="font-size: 0.95em;">Còn lại: <strong>{{ $product->stock }}</strong> sản phẩm</p>
                             @if($product->is_discount)
                                 <span class="badge badge-success">Giảm giá</span>
                             @endif
@@ -100,6 +101,7 @@
                                 <del>{{ number_format($product->old_price, 0, ',', '.') }} ₫</del>
                                 <span class="text-danger">{{ number_format($product->price, 0, ',', '.') }} ₫</span>
                             </p>
+                            <p class="text-muted mb-1" style="font-size: 0.95em;">Còn lại: <strong>{{ $product->stock }}</strong> sản phẩm</p>
                             <span class="badge badge-success">Giảm giá</span>
                             <form action="{{ route('cart.add', $product->id) }}" method="POST">
                                 @csrf
@@ -122,6 +124,7 @@
                         <div class="card-body">
                             <h6 class="card-title">{{ $product->name }}</h6>
                             <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
+                            <p class="text-muted mb-1" style="font-size: 0.95em;">Còn lại: <strong>{{ $product->stock }}</strong> sản phẩm</p>
                             <form action="{{ route('cart.add', $product->id) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="btn btn-primary btn-sm mt-2 add-to-cart-btn">Thêm vào giỏ</button>
