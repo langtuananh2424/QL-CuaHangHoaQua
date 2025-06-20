@@ -1,23 +1,33 @@
 <?php
 
-namespace Database\Seeders;
-
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        Model::unguard();
+        // Seed users (customers) và fruits trước
+        $users = \App\Models\User::factory(10)->create(['role' => 'customer']);
+        $fruits = \App\Models\Fruit::factory(20)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Seed orders và order_items
+        $users->each(function ($user) use ($fruits) {
+            for ($i = 0; $i < rand(1, 3); $i++) {
+                $order = \App\Models\Order::factory()->make();
+                $order->user_id = $user->id;
+                $order->save();
+                $orderFruits = $fruits->random(rand(1, 5));
+                foreach ($orderFruits as $fruit) {
+                    \App\Models\OrderItem::factory()->create([
+                        'order_id' => $order->id,
+                        'fruit_id' => $fruit->id,
+                    ]);
+                }
+            }
+        });
+        Model::reguard();
     }
 }
