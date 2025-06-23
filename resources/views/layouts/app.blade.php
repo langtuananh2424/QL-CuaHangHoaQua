@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>Quản lí hoa quả sạch</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -49,6 +50,9 @@
                         @if(Auth::user()->role === 'admin')
                             <a href="{{ route('admin.products') }}" style="color: white; margin-right: 15px; text-decoration: none;">
                                 <i class="fa fa-cogs"></i> Quản lý
+                            </a>
+                            <a href="{{ route('admin.fruit-data') }}" style="color: white; margin-right: 15px; text-decoration: none;">
+                                <i class="fa fa-seedling"></i> Factory Pattern
                             </a>
                         @endif
                         <span><i class="fa fa-user"></i> {{ Auth::user()->name }}</span>

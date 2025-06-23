@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FruitDataController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -43,6 +44,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/customers/{id}/edit', [AdminController::class, 'editCustomer'])->name('admin.customers.edit');
     Route::post('/admin/customers/{id}/update', [AdminController::class, 'updateCustomer'])->name('admin.customers.update');
     Route::delete('/admin/customers/{id}', [AdminController::class, 'deleteCustomer'])->name('admin.customers.delete');
+
+    // Routes cho Factory Pattern - Chỉ admin mới có thể truy cập
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/fruit-data', [FruitDataController::class, 'index'])->name('admin.fruit-data');
+        Route::post('/admin/fruit-data/create', [FruitDataController::class, 'createData'])->name('admin.fruit-data.create');
+        Route::post('/admin/fruit-data/single', [FruitDataController::class, 'createSingleFruit'])->name('admin.fruit-data.single');
+        Route::post('/admin/fruit-data/demo', [FruitDataController::class, 'createDemoData'])->name('admin.fruit-data.demo');
+        Route::post('/admin/fruit-data/clear', [FruitDataController::class, 'clearData'])->name('admin.fruit-data.clear');
+        Route::get('/admin/fruit-data/statistics', [FruitDataController::class, 'getStatistics'])->name('admin.fruit-data.statistics');
+    });
 });
 
 Route::get('/fruits/{id}', [\App\Http\Controllers\HomeController::class, 'showFruit'])->name('fruits.show');

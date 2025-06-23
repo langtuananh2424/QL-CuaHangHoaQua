@@ -27,6 +27,11 @@
                     <i class="fa fa-file-invoice"></i> Quản lý đơn hàng
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link{{ request()->routeIs('admin.fruit-data') ? ' active' : '' }}" href="{{ route('admin.fruit-data') }}">
+                    <i class="fa fa-seedling"></i> Factory Pattern - Fruit Data
+                </a>
+            </li>
         </ul>
     </div>
 </div>
