@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use App\DesignPatterns\Observer\OrderPlaced;
+use App\DesignPatterns\Facade\CheckoutFacade;
 
 class CartController extends Controller
 {
@@ -82,61 +83,28 @@ class CartController extends Controller
             return redirect()->route('cart.show')->with('error', 'Bạn chưa chọn sản phẩm nào để thanh toán!');
         }
 
-        // --- MEMENTO: Lưu trạng thái giỏ hàng trước khi thanh toán ---
-        $cartItems = $order->orderItems->map(function($item) {
-            return [
+        // Chuẩn bị dữ liệu cho Facade
+        $orderData = [
+            'customer_name' => $user->name,
+            'user_id' => $user->id,
+        ];
+        $items = [];
+        foreach ($selectedItems as $item) {
+            $items[] = [
                 'fruit_id' => $item->fruit_id,
                 'quantity' => $item->quantity,
             ];
-        })->toArray();
-        $cart = new Cart($cartItems);
-        \App\DesignPatterns\Memento\CartCaretaker::save($cart->createMemento());
-        // -----------------------------------------------------------
+        }
+        $discountRate = 0; // Có thể lấy từ request nếu có khuyến mãi
 
-        // Cập nhật tồn kho cho các sản phẩm được thanh toán
-        foreach ($selectedItems as $item) {
-            $fruit = $item->fruit;
-            if ($fruit) {
-                $fruit->stock = max(0, $fruit->stock - $item->quantity);
-                $fruit->save();
-            }
-        }
-
-        if ($selectedItems->count() === $order->orderItems->count()) {
-            $order->status = 'completed';
-            $order->save();
-        } else {
-            // Tạo order mới completed với các item được chọn
-            $newOrder = \App\Models\Order::create([
-                'user_id' => $user->id,
-                'total_amount' => 0,
-                'final_amount' => 0,
-                'status' => 'completed',
-            ]);
-            $total = 0;
-            foreach ($selectedItems as $item) {
-                $newOrder->orderItems()->create([
-                    'fruit_id' => $item->fruit_id,
-                    'quantity' => $item->quantity,
-                ]);
-                $total += $item->quantity * $item->fruit->price;
-                $item->delete();
-            }
-            $newOrder->total_amount = $total;
-            $newOrder->final_amount = $total;
-            $newOrder->save();
-            // --- OBSERVER: Phát event sau khi tạo order mới ---
-            event(new OrderPlaced($newOrder));
-            // -------------------------------------------------
-        }
-        // Luôn cập nhật lại tổng tiền order pending (kể cả khi đã thanh toán hết)
-        $pendingTotal = 0;
-        foreach ($order->orderItems as $item) {
-            $pendingTotal += $item->quantity * $item->fruit->price;
-        }
-        $order->total_amount = $pendingTotal;
-        $order->final_amount = $pendingTotal;
-        $order->save();
+        \Log::info('THANH TOÁN: Gọi Facade', [
+            'pending_order_id' => $order->id,
+            'orderData' => $orderData,
+            'items' => $items
+        ]);
+        $facade = new CheckoutFacade();
+        $result = $facade->processOrder($order->id, $orderData, $items, $discountRate);
+        \Log::info('THANH TOÁN: Kết quả Facade trả về', $result);
 
         // --- LƯU LẠI SẢN PHẨM VỪA THANH TOÁN ĐỂ HOÀN TÁC ---
         $justPaidItems = $selectedItems->map(function($item) {
@@ -148,7 +116,11 @@ class CartController extends Controller
         session(['just_paid_items' => $justPaidItems]);
         // -----------------------------------------------------
 
-        return redirect()->route('home')->with('success', 'Thanh toán thành công!');
+        if ($result['success']) {
+            return redirect()->route('home')->with('success', 'Thanh toán thành công!');
+        } else {
+            return redirect()->route('cart.show')->with('error', $result['message']);
+        }
     }
 
     public function cancel()

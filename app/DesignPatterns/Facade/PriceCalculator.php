@@ -41,4 +41,9 @@ class PriceCalculator
             'total' => $total
         ];
     }
+
+    public function getFruitPrice(int $fruitId): float
+    {
+        return $this->inventoryManager->getFruitPrice($fruitId);
+    }
 }

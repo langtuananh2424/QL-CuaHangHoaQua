@@ -17,7 +17,7 @@ class BasicFruitDisplay implements FruitDisplayInterface
     {
         $html = "<h2>{$this->fruit->name}</h2>";
         $html .= "<p class='mb-1'><strong>Giá:</strong> " . number_format($this->fruit->price, 0, ',', '.') . " ₫";
-        if ($this->fruit->old_price) {
+        if (!empty($this->fruit->is_discount) && $this->fruit->old_price) {
             $html .= " <span class='text-muted ml-2'><del>" . number_format($this->fruit->old_price, 0, ',', '.') . " ₫</del></span>";
         }
         $html .= "</p>";
