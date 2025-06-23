@@ -9,8 +9,25 @@
         <link rel="stylesheet" href="{{ asset('css/header.css') }}">
         @stack('styles')
         <style>
-            body { background: #f8f9fa; }
-            .footer { background: #388e3c; color: #fff; padding: 20px 0; margin-top: 40px; }
+            html, body {
+                height: 100%;
+            }
+            body {
+                background: #f8f9fa;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            main {
+                flex: 1 0 auto;
+            }
+            .footer {
+                background: #388e3c;
+                color: #fff;
+                padding: 20px 0;
+                margin-top: 40px;
+                flex-shrink: 0;
+            }
         </style>
     </head>
     <body>
@@ -21,7 +38,6 @@
                 <nav class="header-nav">
                     <ul class="header-nav-list">
                         <li><a class="active" href="/">Trang chủ</a></li>
-                        <li><a href="#">Sản phẩm</a></li>
                     </ul>
                 </nav>
                 <form class="header-search" action="{{ route('home') }}" method="get">

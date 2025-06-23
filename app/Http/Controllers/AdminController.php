@@ -73,7 +73,10 @@ class AdminController extends Controller
         $data['is_discount'] = $request->has('is_discount') ? 1 : 0;
         $data['is_clean'] = $request->has('is_clean') ? 1 : 0;
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('fruits', 'public');
+            $file = $request->file('image');
+            $filename = $file->getClientOriginalName();
+            $file->move(public_path('images/fruits'), $filename);
+            $data['image'] = $filename;
         }
         \App\Models\Fruit::create($data);
         return redirect()->route('admin.products')->with('success', 'Thêm sản phẩm thành công!');
@@ -102,7 +105,10 @@ class AdminController extends Controller
         $data['is_discount'] = $request->has('is_discount') ? 1 : 0;
         $data['is_clean'] = $request->has('is_clean') ? 1 : 0;
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('fruits', 'public');
+            $file = $request->file('image');
+            $filename = $file->getClientOriginalName();
+            $file->move(public_path('images/fruits'), $filename);
+            $data['image'] = $filename;
         }
         $product->update($data);
         return redirect()->route('admin.products')->with('success', 'Cập nhật sản phẩm thành công!');
@@ -117,13 +123,13 @@ class AdminController extends Controller
 
     public function editCustomer($id)
     {
-        $customer = \App\Models\User::where('role', 'customer')->findOrFail($id);
+        $customer = \App\Models\User::findOrFail($id);
         return view('admin.edit_customer', compact('customer'));
     }
 
     public function updateCustomer(Request $request, $id)
     {
-        $customer = \App\Models\User::where('role', 'customer')->orWhere('role', 'admin')->findOrFail($id);
+        $customer = \App\Models\User::findOrFail($id);
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $customer->id,
@@ -142,7 +148,13 @@ class AdminController extends Controller
 
     public function deleteCustomer($id)
     {
-        $customer = \App\Models\User::where('role', 'customer')->findOrFail($id);
+        $customer = \App\Models\User::findOrFail($id);
+        // Xóa toàn bộ orders của user (và order_items liên quan)
+        $orders = $customer->orders;
+        foreach ($orders as $order) {
+            $order->orderItems()->delete();
+            $order->delete();
+        }
         $customer->delete();
         return redirect()->route('admin.customers')->with('success', 'Đã xóa khách hàng!');
     }

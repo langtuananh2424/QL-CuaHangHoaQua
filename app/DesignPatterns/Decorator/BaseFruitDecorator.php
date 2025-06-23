@@ -4,15 +4,20 @@ namespace App\DesignPatterns\Decorator;
 
 abstract class BaseFruitDecorator implements FruitDisplayInterface
 {
-    protected FruitDisplayInterface $fruit;
+    protected $display;
 
-    public function __construct(FruitDisplayInterface $fruit)
+    public function __construct(FruitDisplayInterface $display)
     {
-        $this->fruit = $fruit;
+        $this->display = $display;
+    }
+
+    public function __get($name)
+    {
+        return $this->display->$name;
     }
 
     public function display(): string
     {
-        return $this->fruit->display();
+        return $this->display->display();
     }
 }

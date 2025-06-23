@@ -45,4 +45,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/customers/{id}', [AdminController::class, 'deleteCustomer'])->name('admin.customers.delete');
 });
 
+Route::get('/fruits/{id}', [\App\Http\Controllers\HomeController::class, 'showFruit'])->name('fruits.show');
+
 require __DIR__.'/auth.php';

@@ -69,18 +69,21 @@
                 @foreach($newProducts as $product)
                 <div class="col-md-3 mb-4">
                     <div class="card h-100">
-                        <img src="{{ asset('images/fruits/' . $product->image) }}" class="card-img-top" alt="{{ $product->name }}">
+                        <img src="{{ (strlen($product->image) > 0 && strlen($product->image) == 40) ? asset('storage/fruits/' . $product->image) : asset('images/fruits/' . $product->image) }}" class="card-img-top" alt="{{ $product->name }}">
                         <div class="card-body">
                             <h6 class="card-title">{{ $product->name }}</h6>
                             <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
                             <p class="text-muted mb-1" style="font-size: 0.95em;">Còn lại: <strong>{{ $product->stock }}</strong> sản phẩm</p>
-                            @if($product->is_discount)
-                                <span class="badge badge-success">Giảm giá</span>
-                            @endif
-                            <form action="{{ route('cart.add', $product->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-primary btn-sm mt-2 add-to-cart-btn">Thêm vào giỏ</button>
-                            </form>
+                            <div class="product-actions d-flex flex-column align-items-start gap-2">
+                                @if($product->is_discount)
+                                    <span class="badge badge-success mb-2">Giảm giá</span>
+                                @endif
+                                <a href="{{ route('fruits.show', $product->id) }}" class="btn btn-info btn-sm mb-2">Xem chi tiết</a>
+                                <form action="{{ route('cart.add', $product->id) }}" method="POST" class="w-100">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary btn-sm add-to-cart-btn w-100">Thêm vào giỏ</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -94,7 +97,7 @@
                 @foreach($discountProducts as $product)
                 <div class="col-md-3 mb-4">
                     <div class="card h-100">
-                        <img src="{{ asset('images/fruits/' . $product->image) }}" class="card-img-top" alt="{{ $product->name }}">
+                        <img src="{{ (strlen($product->image) > 0 && strlen($product->image) == 40) ? asset('storage/fruits/' . $product->image) : asset('images/fruits/' . $product->image) }}" class="card-img-top" alt="{{ $product->name }}">
                         <div class="card-body">
                             <h6 class="card-title">{{ $product->name }}</h6>
                             <p class="card-text">
@@ -102,11 +105,14 @@
                                 <span class="text-danger">{{ number_format($product->price, 0, ',', '.') }} ₫</span>
                             </p>
                             <p class="text-muted mb-1" style="font-size: 0.95em;">Còn lại: <strong>{{ $product->stock }}</strong> sản phẩm</p>
-                            <span class="badge badge-success">Giảm giá</span>
-                            <form action="{{ route('cart.add', $product->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-primary btn-sm mt-2 add-to-cart-btn">Thêm vào giỏ</button>
-                            </form>
+                            <div class="product-actions d-flex flex-column align-items-start gap-2">
+                                <span class="badge badge-success mb-2">Giảm giá</span>
+                                <a href="{{ route('fruits.show', $product->id) }}" class="btn btn-info btn-sm mb-2">Xem chi tiết</a>
+                                <form action="{{ route('cart.add', $product->id) }}" method="POST" class="w-100">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary btn-sm add-to-cart-btn w-100">Thêm vào giỏ</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -120,15 +126,18 @@
                 @foreach($cleanFruits as $product)
                 <div class="col-md-3 mb-4">
                     <div class="card h-100">
-                        <img src="{{ asset('images/fruits/' . $product->image) }}" class="card-img-top" alt="{{ $product->name }}">
+                        <img src="{{ (strlen($product->image) > 0 && strlen($product->image) == 40) ? asset('storage/fruits/' . $product->image) : asset('images/fruits/' . $product->image) }}" class="card-img-top" alt="{{ $product->name }}">
                         <div class="card-body">
                             <h6 class="card-title">{{ $product->name }}</h6>
                             <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} ₫</p>
                             <p class="text-muted mb-1" style="font-size: 0.95em;">Còn lại: <strong>{{ $product->stock }}</strong> sản phẩm</p>
-                            <form action="{{ route('cart.add', $product->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-primary btn-sm mt-2 add-to-cart-btn">Thêm vào giỏ</button>
-                            </form>
+                            <div class="product-actions d-flex flex-column align-items-start gap-2">
+                                <a href="{{ route('fruits.show', $product->id) }}" class="btn btn-info btn-sm mb-2">Xem chi tiết</a>
+                                <form action="{{ route('cart.add', $product->id) }}" method="POST" class="w-100">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary btn-sm add-to-cart-btn w-100">Thêm vào giỏ</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

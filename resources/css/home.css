@@ -22,3 +22,14 @@
     color: #fff;
     margin-left: 5px;
 }
+.product-actions > * {
+    width: 100%;
+}
+.product-actions .btn,
+.product-actions .badge {
+    margin-bottom: 8px;
+}
+.product-actions .btn:last-child,
+.product-actions .badge:last-child {
+    margin-bottom: 0;
+}

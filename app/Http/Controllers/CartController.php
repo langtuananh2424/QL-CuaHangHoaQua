@@ -114,15 +114,15 @@ class CartController extends Controller
             $newOrder->total_amount = $total;
             $newOrder->final_amount = $total;
             $newOrder->save();
-            // Cập nhật lại tổng tiền order pending
-            $pendingTotal = 0;
-            foreach ($order->orderItems as $item) {
-                $pendingTotal += $item->quantity * $item->fruit->price;
-            }
-            $order->total_amount = $pendingTotal;
-            $order->final_amount = $pendingTotal;
-            $order->save();
         }
+        // Luôn cập nhật lại tổng tiền order pending (kể cả khi đã thanh toán hết)
+        $pendingTotal = 0;
+        foreach ($order->orderItems as $item) {
+            $pendingTotal += $item->quantity * $item->fruit->price;
+        }
+        $order->total_amount = $pendingTotal;
+        $order->final_amount = $pendingTotal;
+        $order->save();
         return redirect()->route('home')->with('success', 'Thanh toán thành công!');
     }
 

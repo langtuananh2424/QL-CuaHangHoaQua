@@ -35,4 +35,10 @@ class HomeController extends Controller
             'searchQuery' => $query,
         ]);
     }
+
+    public function showFruit($id)
+    {
+        $fruit = \App\Models\Fruit::findOrFail($id);
+        return view('fruits.show', compact('fruit'));
+    }
 }

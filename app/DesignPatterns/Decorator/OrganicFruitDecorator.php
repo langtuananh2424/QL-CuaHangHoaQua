@@ -4,8 +4,12 @@ namespace App\DesignPatterns\Decorator;
 
 class OrganicFruitDecorator extends BaseFruitDecorator
 {
-    public function display(): string
+    public function render()
     {
-        return parent::display() . ' <span class="badge badge-organic">Hữu cơ</span>';
+        $html = $this->display->render();
+        if ($this->fruit->is_clean) {
+            $html .= '<span class="badge badge-info ml-2">Sạch</span>';
+        }
+        return $html;
     }
 }
