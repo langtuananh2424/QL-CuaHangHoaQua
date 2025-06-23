@@ -75,7 +75,6 @@
                                     <label>&nbsp;</label>
                                     <div>
                                         <button type="submit" class="btn btn-primary">Tạo dữ liệu</button>
-                                        <button type="button" class="btn btn-success" onclick="createDemoData()">Tạo Demo</button>
                                     </div>
                                 </div>
                             </div>
@@ -167,25 +166,6 @@ document.getElementById('createDataForm').addEventListener('submit', function(e)
     });
 });
 
-// Tạo dữ liệu demo
-function createDemoData() {
-    fetch('{{ route("admin.fruit-data.demo") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        showResult(data.success ? 'success' : 'danger', data.message);
-        if (data.success) {
-            setTimeout(() => location.reload(), 2000);
-        }
-    })
-    .catch(error => {
-        showResult('danger', 'Lỗi: ' + error.message);
-    });
-}
 
 // Tạo một loại trái cây
 function createSingleFruit(type) {

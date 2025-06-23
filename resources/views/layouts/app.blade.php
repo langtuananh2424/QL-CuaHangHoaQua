@@ -51,9 +51,6 @@
                             <a href="{{ route('admin.products') }}" style="color: white; margin-right: 15px; text-decoration: none;">
                                 <i class="fa fa-cogs"></i> Quản lý
                             </a>
-                            <a href="{{ route('admin.fruit-data') }}" style="color: white; margin-right: 15px; text-decoration: none;">
-                                <i class="fa fa-seedling"></i> Factory Pattern
-                            </a>
                         @endif
                         <span><i class="fa fa-user"></i> {{ Auth::user()->name }}</span>
                         <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fa fa-sign-out-alt"></i> Đăng xuất</a>

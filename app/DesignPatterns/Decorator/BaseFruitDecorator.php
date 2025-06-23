@@ -16,8 +16,8 @@ abstract class BaseFruitDecorator implements FruitDisplayInterface
         return $this->display->$name;
     }
 
-    public function display(): string
+    public function render(): string
     {
-        return $this->display->display();
+        return $this->display->render();
     }
 }

@@ -13,12 +13,7 @@ class BasicFruitDisplay implements FruitDisplayInterface
         $this->fruit = $fruit;
     }
 
-    public function display(): string
-    {
-        return $this->fruit->getName() . ' - Color: ' . $this->fruit->getColor() . ' - Taste: ' . $this->fruit->getTaste();
-    }
-
-    public function render()
+    public function render(): string
     {
         $html = "<h2>{$this->fruit->name}</h2>";
         $html .= "<p class='mb-1'><strong>Giá:</strong> " . number_format($this->fruit->price, 0, ',', '.') . " ₫";

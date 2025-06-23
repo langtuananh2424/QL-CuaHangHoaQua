@@ -4,8 +4,9 @@ namespace App\DesignPatterns\Decorator;
 
 class NewArrivalDecorator extends BaseFruitDecorator
 {
-    public function display(): string
+    public function render(): string
     {
-        return parent::display() . ' <span class="badge badge-new">Hàng mới về</span>';
+        $baseDisplay = parent::render();
+        return $baseDisplay . '<span class="badge new-arrival-badge">Mới Nhập</span>';
     }
 }

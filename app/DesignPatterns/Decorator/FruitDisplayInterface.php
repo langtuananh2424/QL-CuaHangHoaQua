@@ -4,5 +4,5 @@ namespace App\DesignPatterns\Decorator;
 
 interface FruitDisplayInterface
 {
-    public function display(): string;
+    public function render(): string;
 }
