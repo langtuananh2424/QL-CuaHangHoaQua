@@ -83,10 +83,14 @@ class CartController extends Controller
         }
 
         // --- MEMENTO: Lưu trạng thái giỏ hàng trước khi thanh toán ---
-        $cart = new Cart($order->orderItems->toArray());
-        $caretaker = new CartCaretaker();
-        $caretaker->save($cart->createMemento());
-        session(['cart_memento' => $caretaker]);
+        $cartItems = $order->orderItems->map(function($item) {
+            return [
+                'fruit_id' => $item->fruit_id,
+                'quantity' => $item->quantity,
+            ];
+        })->toArray();
+        $cart = new Cart($cartItems);
+        \App\DesignPatterns\Memento\CartCaretaker::save($cart->createMemento());
         // -----------------------------------------------------------
 
         // Cập nhật tồn kho cho các sản phẩm được thanh toán
@@ -133,6 +137,17 @@ class CartController extends Controller
         $order->total_amount = $pendingTotal;
         $order->final_amount = $pendingTotal;
         $order->save();
+
+        // --- LƯU LẠI SẢN PHẨM VỪA THANH TOÁN ĐỂ HOÀN TÁC ---
+        $justPaidItems = $selectedItems->map(function($item) {
+            return [
+                'fruit_id' => $item->fruit_id,
+                'quantity' => $item->quantity,
+            ];
+        })->toArray();
+        session(['just_paid_items' => $justPaidItems]);
+        // -----------------------------------------------------
+
         return redirect()->route('home')->with('success', 'Thanh toán thành công!');
     }
 
@@ -158,6 +173,15 @@ class CartController extends Controller
         if ($order) {
             $item = $order->orderItems()->where('id', $itemId)->first();
             if ($item) {
+                // Lưu lại sản phẩm vừa xóa để hoàn tác
+                \Log::info('Lưu just_removed_item', [
+                    'fruit_id' => $item->fruit_id,
+                    'quantity' => $item->quantity,
+                ]);
+                session(['just_removed_item' => [
+                    'fruit_id' => $item->fruit_id,
+                    'quantity' => $item->quantity,
+                ]]);
                 $item->delete();
                 // Cập nhật lại tổng tiền
                 $total = 0;
@@ -179,11 +203,45 @@ class CartController extends Controller
         $order = \App\Models\Order::where('user_id', $user->id)
             ->where('status', 'pending')
             ->first();
-        $memento = \App\DesignPatterns\Memento\CartCaretaker::restore();
-        if (!$memento) {
-            return redirect()->route('cart.show')->with('error', 'Không thể hoàn tác!');
+        // Ưu tiên hoàn tác sản phẩm vừa xóa
+        $justRemovedItem = session('just_removed_item', null);
+        \Log::info('Lấy just_removed_item trong undoCart', ['just_removed_item' => $justRemovedItem]);
+        if ($justRemovedItem) {
+            if (!$order) {
+                $order = \App\Models\Order::create([
+                    'user_id' => $user->id,
+                    'total_amount' => 0,
+                    'final_amount' => 0,
+                    'status' => 'pending',
+                ]);
+            }
+            $orderItem = $order->orderItems()->where('fruit_id', $justRemovedItem['fruit_id'])->first();
+            if ($orderItem) {
+                $orderItem->quantity += $justRemovedItem['quantity'];
+                $orderItem->save();
+            } else {
+                $order->orderItems()->create([
+                    'fruit_id' => $justRemovedItem['fruit_id'],
+                    'quantity' => $justRemovedItem['quantity'],
+                ]);
+            }
+            // Cập nhật lại tổng tiền
+            $pendingTotal = 0;
+            foreach ($order->orderItems as $item) {
+                $pendingTotal += $item->quantity * $item->fruit->price;
+            }
+            $order->total_amount = $pendingTotal;
+            $order->final_amount = $pendingTotal;
+            $order->save();
+            session()->forget('just_removed_item');
+            \Log::info('Đã hoàn tác sản phẩm vừa xóa', ['fruit_id' => $justRemovedItem['fruit_id'], 'quantity' => $justRemovedItem['quantity']]);
+            return redirect()->route('cart.show')->with('success', 'Đã hoàn tác sản phẩm vừa xóa!');
         }
-        // Nếu không còn order pending, tạo mới
+        // Nếu không có sản phẩm vừa xóa, hoàn tác sản phẩm vừa thanh toán như hiện tại
+        $justPaidItems = session('just_paid_items', []);
+        if (empty($justPaidItems)) {
+            return redirect()->route('cart.show')->with('error', 'Không có sản phẩm nào để hoàn tác!');
+        }
         if (!$order) {
             $order = \App\Models\Order::create([
                 'user_id' => $user->id,
@@ -192,19 +250,18 @@ class CartController extends Controller
                 'status' => 'pending',
             ]);
         }
-        $cart = new \App\DesignPatterns\Memento\Cart([]);
-        $cart->restoreFromMemento($memento);
-        $state = $cart->getState();
-        // Xóa toàn bộ order item hiện tại
-        $order->orderItems()->delete();
-        // Khôi phục lại các order item từ trạng thái đã lưu
-        foreach ($state as $item) {
-            $order->orderItems()->create([
-                'fruit_id' => $item['fruit_id'],
-                'quantity' => $item['quantity'],
-            ]);
+        foreach ($justPaidItems as $item) {
+            $orderItem = $order->orderItems()->where('fruit_id', $item['fruit_id'])->first();
+            if ($orderItem) {
+                $orderItem->quantity += $item['quantity'];
+                $orderItem->save();
+            } else {
+                $order->orderItems()->create([
+                    'fruit_id' => $item['fruit_id'],
+                    'quantity' => $item['quantity'],
+                ]);
+            }
         }
-        // Cập nhật lại tổng tiền
         $pendingTotal = 0;
         foreach ($order->orderItems as $item) {
             $pendingTotal += $item->quantity * $item->fruit->price;
@@ -212,6 +269,8 @@ class CartController extends Controller
         $order->total_amount = $pendingTotal;
         $order->final_amount = $pendingTotal;
         $order->save();
-        return redirect()->route('cart.show')->with('success', 'Đã hoàn tác giỏ hàng!');
+        session()->forget('just_paid_items');
+        \Log::info('Đã hoàn tác sản phẩm vừa thanh toán', ['just_paid_items' => $justPaidItems]);
+        return redirect()->route('cart.show')->with('success', 'Đã hoàn tác sản phẩm vừa thanh toán!');
     }
 }
