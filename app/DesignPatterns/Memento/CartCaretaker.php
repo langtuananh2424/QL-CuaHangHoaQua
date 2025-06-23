@@ -13,6 +13,7 @@ class CartCaretaker
 
     public static function restore(): ?CartMemento
     {
-        return session(self::SESSION_KEY, null);
+        $memento = session(self::SESSION_KEY, null);
+        return $memento instanceof CartMemento ? $memento : null;
     }
 }

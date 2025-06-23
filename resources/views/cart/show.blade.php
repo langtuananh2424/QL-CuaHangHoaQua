@@ -49,6 +49,10 @@
             @csrf
             <button type="submit" class="btn btn-danger ml-2">Hủy giỏ hàng</button>
         </form>
+        <form action="{{ route('cart.undo') }}" method="POST" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-warning ml-2">Hoàn tác giỏ hàng</button>
+        </form>
         <script>
         document.getElementById('select-all').addEventListener('change', function() {
             let checked = this.checked;

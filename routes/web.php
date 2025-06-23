@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
     Route::post('/cart/cancel', [CartController::class, 'cancel'])->name('cart.cancel');
     Route::post('/cart/remove-item/{itemId}', [CartController::class, 'removeItem'])->name('cart.removeItem');
+    Route::post('/cart/undo', [CartController::class, 'undoCart'])->name('cart.undo');
     Route::get('/admin/products', [AdminController::class, 'products'])->name('admin.products');
     Route::get('/admin/customers', [AdminController::class, 'customers'])->name('admin.customers');
     Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');

@@ -9,6 +9,7 @@ use App\DesignPatterns\Memento\CartCaretaker;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
+use App\DesignPatterns\Observer\OrderPlaced;
 
 class CartController extends Controller
 {
@@ -81,6 +82,13 @@ class CartController extends Controller
             return redirect()->route('cart.show')->with('error', 'Bạn chưa chọn sản phẩm nào để thanh toán!');
         }
 
+        // --- MEMENTO: Lưu trạng thái giỏ hàng trước khi thanh toán ---
+        $cart = new Cart($order->orderItems->toArray());
+        $caretaker = new CartCaretaker();
+        $caretaker->save($cart->createMemento());
+        session(['cart_memento' => $caretaker]);
+        // -----------------------------------------------------------
+
         // Cập nhật tồn kho cho các sản phẩm được thanh toán
         foreach ($selectedItems as $item) {
             $fruit = $item->fruit;
@@ -90,7 +98,6 @@ class CartController extends Controller
             }
         }
 
-        // Nếu chọn hết thì chuyển trạng thái order sang completed
         if ($selectedItems->count() === $order->orderItems->count()) {
             $order->status = 'completed';
             $order->save();
@@ -114,6 +121,9 @@ class CartController extends Controller
             $newOrder->total_amount = $total;
             $newOrder->final_amount = $total;
             $newOrder->save();
+            // --- OBSERVER: Phát event sau khi tạo order mới ---
+            event(new OrderPlaced($newOrder));
+            // -------------------------------------------------
         }
         // Luôn cập nhật lại tổng tiền order pending (kể cả khi đã thanh toán hết)
         $pendingTotal = 0;
@@ -161,5 +171,47 @@ class CartController extends Controller
             }
         }
         return redirect()->route('cart.show')->with('error', 'Không tìm thấy sản phẩm để xóa!');
+    }
+
+    public function undoCart()
+    {
+        $user = Auth::user();
+        $order = \App\Models\Order::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+        $memento = \App\DesignPatterns\Memento\CartCaretaker::restore();
+        if (!$memento) {
+            return redirect()->route('cart.show')->with('error', 'Không thể hoàn tác!');
+        }
+        // Nếu không còn order pending, tạo mới
+        if (!$order) {
+            $order = \App\Models\Order::create([
+                'user_id' => $user->id,
+                'total_amount' => 0,
+                'final_amount' => 0,
+                'status' => 'pending',
+            ]);
+        }
+        $cart = new \App\DesignPatterns\Memento\Cart([]);
+        $cart->restoreFromMemento($memento);
+        $state = $cart->getState();
+        // Xóa toàn bộ order item hiện tại
+        $order->orderItems()->delete();
+        // Khôi phục lại các order item từ trạng thái đã lưu
+        foreach ($state as $item) {
+            $order->orderItems()->create([
+                'fruit_id' => $item['fruit_id'],
+                'quantity' => $item['quantity'],
+            ]);
+        }
+        // Cập nhật lại tổng tiền
+        $pendingTotal = 0;
+        foreach ($order->orderItems as $item) {
+            $pendingTotal += $item->quantity * $item->fruit->price;
+        }
+        $order->total_amount = $pendingTotal;
+        $order->final_amount = $pendingTotal;
+        $order->save();
+        return redirect()->route('cart.show')->with('success', 'Đã hoàn tác giỏ hàng!');
     }
 }
