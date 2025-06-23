@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\DesignPatterns\Factory\FruitFactory;
 use App\Models\Fruit;
+use App\Models\OrderItem;
+use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 
 class FruitDataService
@@ -17,11 +19,12 @@ class FruitDataService
      */
     public function createFruitData(int $quantity = 1, bool $clearExisting = false): array
     {
-        DB::beginTransaction();
-
         try {
             if ($clearExisting) {
-                Fruit::truncate();
+                $clearResult = $this->clearAllData();
+                if (!$clearResult['success']) {
+                    return $clearResult;
+                }
             }
 
             $startTime = microtime(true);
@@ -29,8 +32,6 @@ class FruitDataService
             $endTime = microtime(true);
 
             $executionTime = round($endTime - $startTime, 2);
-
-            DB::commit();
 
             return [
                 'success' => true,
@@ -43,8 +44,6 @@ class FruitDataService
             ];
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
             return [
                 'success' => false,
                 'message' => "Lỗi khi tạo dữ liệu: " . $e->getMessage(),
@@ -116,16 +115,35 @@ class FruitDataService
     public function clearAllData(): array
     {
         try {
-            $count = Fruit::count();
+            $fruitCount = Fruit::count();
+            $orderItemCount = OrderItem::count();
+            $orderCount = Order::count();
+
+            // Tắt foreign key checks tạm thời
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+            // Xóa theo thứ tự: order_items -> orders -> fruits
+            OrderItem::truncate();
+            Order::truncate();
             Fruit::truncate();
+
+            // Bật lại foreign key checks
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
             return [
                 'success' => true,
-                'message' => "Đã xóa {$count} bản ghi trái cây",
-                'data' => ['deleted_count' => $count]
+                'message' => "Đã xóa {$fruitCount} bản ghi trái cây, {$orderItemCount} order items, và {$orderCount} orders",
+                'data' => [
+                    'deleted_fruits' => $fruitCount,
+                    'deleted_order_items' => $orderItemCount,
+                    'deleted_orders' => $orderCount
+                ]
             ];
 
         } catch (\Exception $e) {
+            // Đảm bảo bật lại foreign key checks nếu có lỗi
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
             return [
                 'success' => false,
                 'message' => "Lỗi khi xóa dữ liệu: " . $e->getMessage(),
